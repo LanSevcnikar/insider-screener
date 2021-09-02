@@ -1,33 +1,16 @@
 const fetch = require("node-fetch");
-const Threader = require("./threader");
 const Timestamp = require("unix-timestamp")
+const { Pool } = require("pg");
+const fsp = require("fs").promises;
+const fs = require("fs");
+const { mainModule } = require("process");
 
-const threader = new Threader();
+const stream = fs.createWriteStream("log.txt");
+let pool = null;
 
-function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
-async function get_prices(index) {
-  console.log("started with", index);
-  await sleep(Math.random() * 1000 + 1000);
-  console.log("finished with", index);
-}
-
-async function _main() {
-  for (let i = 0; i < 20; i += 1) {
-    threader.addToQueue({ action: get_prices, args: [i] });
-  }
-
-  threader.run_threads(3);
-}
-
-for (let i = 0; i < 1; i++) {
-  const ticker = "AMZN";
+async function get_prices(ticker) {
   const start = Timestamp.fromDate("2010-01-01");
-  const stop = Timestamp.fromDate("2021-08-25");
+  const stop = Timestamp.fromDate("2021-08-28");
 
   const url = `
     https://query2.finance.yahoo.com/v8/finance/chart/${ticker}
@@ -46,13 +29,36 @@ for (let i = 0; i < 1; i++) {
 
   fetch(url).then(res => res.json()).then(res => {
     console.log("Successful fetch")
-    res.chart.result[0].timestamp.forEach((date,  index) => {
-      console.log(
-        index,
-        Timestamp.toDate(date),
-        res.chart.result[0].indicators.adjclose[0].adjclose[index]
-      )
+    let prices_json = {};
+    res.chart.result[0].timestamp.forEach((date, index) => {
+      const price_value = res.chart.result[0].indicators.adjclose[0].adjclose[index];
+      prices_json[date] = price_value;
     });
+    pool.query(
+      `INSERT INTO is_past_prices (stock_ticker, price_history) VALUES ($1, $2)`,
+      [ticker, prices_json]
+    )
   });
 
 }
+
+async function _main() {
+  const data = await fsp.readFile('../psql_password')
+  pool = new Pool({
+    user: "lansev",
+    host: "192.168.1.4",
+    database: "insider-screener",
+    password: data,
+    port: 5432,
+  });
+
+  pool.query('select distinct stock_ticker from is_past_trades;').then(res => {
+    res.rows.forEach(row => {
+      get_prices(row.stock_ticker)
+      console.log(row.stock_ticker)
+    });
+  })
+
+}
+
+_main()
