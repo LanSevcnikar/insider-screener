@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "..\\.."
+		},
+		{
+			"path": "..\\..\\..\\insider_screener_server"
+		},
+		{
+			"path": "..\\..\\..\\get_old_prices"
+		}
+	],
+	"settings": {}
+}
