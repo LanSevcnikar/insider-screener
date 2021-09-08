@@ -67,25 +67,31 @@ export default {
   methods: {
     async change_state() {
       if (!this.show_details) {
-        const payload = {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ stock_id: this.trade.stock_ticker }),
-        };
-        const res = await fetch("http://localhost:3000/getpp", payload);
-        const res_json = await res.json();
-        Object.keys(res_json.rows[0].price_history).forEach((price_date) => {
-          this.old_prices += dateFormat(
-            new Date(price_date * 1000),
-            "mmm dd, yyyy => "
-          );
-          this.old_prices += Math.floor(res_json.rows[0].price_history[price_date]*100)/100;
-          this.old_prices += "$ \n";
-        });
+        try {
+          const payload = {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ stock_id: this.trade.stock_ticker }),
+          };
+          const res = await fetch("http://localhost:3000/getpp", payload);
+          const res_json = await res.json();
+          Object.keys(res_json.rows[0].price_history).forEach((price_date) => {
+            this.old_prices += dateFormat(
+              new Date(price_date * 1000),
+              "mmm dd, yyyy => "
+            );
+            this.old_prices +=
+              Math.floor(res_json.rows[0].price_history[price_date] * 100) /
+              100;
+            this.old_prices += "$ \n";
+          });
 
-        console.log(res_json.rows[0].price_history);
+          console.log(res_json.rows[0].price_history);
+        } catch (e) {
+          console.log(e);
+        }
         this.show_details = !this.show_details;
       } else {
         this.show_details = !this.show_details;

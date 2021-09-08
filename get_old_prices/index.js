@@ -4,11 +4,12 @@ const { Pool } = require("pg");
 const fsp = require("fs").promises;
 const fs = require("fs");
 const { mainModule } = require("process");
+const Threader = require("../my_packages/threader");
 
 const stream = fs.createWriteStream("log.txt");
 let pool = null;
 
-let ticker_fail = 0;
+const threader = new Threader();
 
 async function get_prices(ticker) {
   const start = Timestamp.fromDate("2010-01-01");
@@ -45,7 +46,6 @@ async function get_prices(ticker) {
   }
   catch (e) {
     console.log("Did not succed on ", ticker)
-    ticker_fail += 1;
   }
 }
 
@@ -63,12 +63,13 @@ async function _main() {
 
   for (let i = 0; i < res.rows.length; i++) {
     const ticker = res.rows[i].stock_ticker;
-    await get_prices(ticker)
-    console.log(ticker_fail,i/res.rows.length)
+    console.log(ticker)
+    //threader.addToQueue({ action: get_prices, args: [ticker] });
   }
 
-  //get_prices("LMNR")
-
+  //console.log(threader.queue.length)
+  //threader.run_threads(20);
 }
+
 
 _main()
