@@ -5,7 +5,15 @@
 		},
 		{
 			"path": "insider_screener_client"
+		},
+		{
+			"path": "d3js_testing"
+		},
+		{
+			"path": "get_past_trades"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "d3js_testing"
+	}
 }

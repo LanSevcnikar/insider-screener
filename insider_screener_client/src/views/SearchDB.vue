@@ -1,20 +1,6 @@
 <template>
   <div>
-    <form @submit.prevent="makeQuery">
-      SELECT * FROM is_past_trades WHERE <br />
-      <textarea v-model="query" placeholder="add multiple lines"></textarea>
-      <br />
-      LIMIT
-      <select v-model="amount">
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="200">200</option>
-        <option value="1000">1000</option>
-      </select>
-      <br />
-      <button type="submit" class="">Query</button>
-    </form>
+    <query-maker></query-maker>
     <div v-if="shown_data.length" class="my_table">
       <table class="table table-striped">
         <thead>
@@ -29,14 +15,19 @@
           </tr>
         </thead>
         <tbody>
-          <past-trade-row
-            v-for="(trade, index) in shown_data"
-            :key="index"
-            :index="index"
-            :trade="trade"
-            :columns="columns"
-          >
-          </past-trade-row>
+          <suspense>
+            <template #default>
+              <past-trade-row
+                v-for="(trade, index) in shown_data"
+                :key="index"
+                :index="index"
+                :trade="trade"
+                :columns="columns"
+              >
+              </past-trade-row>
+            </template>
+            <template #fallback> ...Loading </template>
+          </suspense>
         </tbody>
       </table>
     </div>
@@ -44,14 +35,20 @@
 </template>
 
 <script>
-import PastTradeRow from "../components/PastTradeRow.vue";
+import { defineAsyncComponent } from "@vue/runtime-core";
+import QueryMaker from '../components/searchdb/QueryMaker.vue'
 
 export default {
-  components: { PastTradeRow },
+  components: {
+    PastTradeRow: defineAsyncComponent(() =>
+      import("../components/searchdb/PastTradeRow.vue")
+    ),
+    QueryMaker,
+  },
   data() {
     return {
       query: "true",
-      amount: 25,
+      amount: 1000,
       shown_data: [],
       columns: [
         "trade_id",
@@ -87,17 +84,16 @@ export default {
       this.shown_data = res_json.rows;
     },
   },
-  created(){
+  created() {
     this.makeQuery();
-  }
+  },
 };
 </script>
 
 <style lang="css" scoped>
-table{
+table {
   border: 1px solid black;
   width: 95%;
   margin: auto;
 }
-
 </style>>

@@ -59,6 +59,7 @@ function add_trades_to_db(
     const quant = parseInt(trade["Qty"].substring(1, 50).replace(",", ""));
     const owned = parseInt(trade["Owned"].replace(",", ""));
 
+    console.log( search_data.SECTOR_NAMES[sector_index])
 
     promises.push(
       new Promise((resolve, reject) => {
@@ -128,14 +129,14 @@ async function _main() {
     }
     pool = new Pool({
       user: "lansev",
-      host: "192.168.1.4",
+      host: "192.168.1.3",
       database: "insider-screener",
       password: data,
       port: 5432,
     });
   })
 
-  for (let i = 1; i < search_data.INDUSTRY_NAMES.length; i++) {
+  for (let i = 6; i < search_data.INDUSTRY_NAMES.length; i++) {
     const industry_code = search_data.INDUSTRY_CODES[i];
     const industry_name = search_data.INDUSTRY_NAMES[i];
 
