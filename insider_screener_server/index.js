@@ -33,7 +33,20 @@ app.post('/searchdb', async (req, res) => {
 app.post('/getqueryparams', async (req, res) => {
   const column_param = req.body.column_param;
   const query_params = req.body.query_params;
-  let query_string = `SELECT DISTINCT ${column_param} from is_past_trades WHERE`
+
+
+  let query_string = ``;
+  if (['trade_date', 'filing_date', 'stock_total'].indexOf(column_param) >= 0) {
+    if (column_param == 'stock_total') {
+
+      query_string = `SELECT MIN(stock_price * stock_quantity), max(stock_price * stock_quantity) FROM is_past_trades WHERE`
+    } else {
+
+      query_string = `SELECT MIN(${column_param}), max(${column_param}) FROM is_past_trades WHERE`
+    }
+  } else {
+    query_string = `SELECT DISTINCT ${column_param} from is_past_trades WHERE`
+  }
   let number_of_args = 0;
 
   //! THIS IS ALL BUILDING UP THE QUERY
@@ -41,7 +54,6 @@ app.post('/getqueryparams', async (req, res) => {
   // buyer_name and comp_info
   const query_options = [
     "buyer_name",
-    "comp_sector",
     "comp_subsector",
     "comp_industry",
     "comp_name",
@@ -86,6 +98,15 @@ app.post('/getqueryparams', async (req, res) => {
 
 
   //! THIS IS ALL BUILDING UP THE RESPONSE JSON
+  //if dates or total value
+  if (['trade_date', 'filing_date', 'stock_total'].indexOf(column_param) >= 0) {
+    const minmaxvalues = {
+      min: query_res.rows[0].min,
+      max: query_res.rows[0].max,
+    }
+    res.json(minmaxvalues);
+    return;
+  }
 
   // if buyer_name and comp_info
   if (query_options.indexOf(column_param) >= 0) {
@@ -97,6 +118,8 @@ app.post('/getqueryparams', async (req, res) => {
     return;
   }
 
+
+  // buyer titles
   let distinct_title_arrays = [];
   query_res.rows.forEach(row => {
     row[column_param].forEach(title => {

@@ -11,6 +11,9 @@
 		},
 		{
 			"path": "get_past_trades"
+		},
+		{
+			"path": "get_old_prices"
 		}
 	],
 	"settings": {

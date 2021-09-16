@@ -1,13 +1,15 @@
 <template>
-  <date-picker></date-picker>
+  <!-- THIS IS THE BUTTONS ON THE TOP -->
   <div class="pb-3 querySelector">
     <div
       v-for="par in [
-        'comp_sector',
         'comp_subsector',
         'comp_industry',
         'comp_name',
         'buyer_name',
+        'buyer_titles',
+        'trade_date',
+        'filing_date',
       ]"
       :key="par"
     >
@@ -23,59 +25,94 @@
         {{ paramTranslator(par) }}
       </button>
     </div>
+
     <div>
       <button
         class="btn"
-        @click="getQueryParams('buyer_titles')"
+        @click="getQueryParams('stock_total')"
         :style="
-          query_params['buyer_titles'] && query_params['buyer_titles'].length
+          query_params['stock_total'] && query_params['stock_total'].length
             ? 'background-color: #ccc;'
             : ''
         "
       >
-        {{ paramTranslator("buyer_titles") }}
+        {{ paramTranslator("stock_total") }}
       </button>
     </div>
   </div>
+
   <div class="popupparent" @click.self="closePopup()" v-if="column_param">
+    <!-- THIS IS TJE POPUP FOR THE CLICKABLE OPTIONS -->
     <div class="popup">
-      <div>
+      <div class="popuptitle">
         {{ paramTranslator(column_param) }}
       </div>
-      <input
-        type="text"
-        class="searchBar"
-        v-model="query_search_string"
-        placeholder="Search"
-      />
-      <div class="optionslist" :key="query_search_string">
-        <div v-if="options.length">
-          <label
-            v-for="option in options.filter(
-              (str) =>
-                str.toLowerCase().indexOf(query_search_string.toLowerCase()) >
-                -1
-            )"
-            :key="option"
-            class="optionrow"
-          >
-            <input
-              type="checkbox"
-              class="form-check-label"
-              id="flexCheckDefault"
-              :value="option"
-              :checked="
-                query_params[column_param] &&
-                query_params[column_param].length &&
-                query_params[column_param].indexOf(option) >= 0
-              "
-              @change="editSelect(column_param, option)"
-            />{{ option }}
-          </label>
+      <div
+        v-if="
+          [
+            'comp_subsector',
+            'comp_industry',
+            'comp_name',
+            'buyer_name',
+            'buyer_titles',
+          ].indexOf(column_param) >= 0
+        "
+      >
+        <input
+          type="text"
+          class="searchBar"
+          v-model="query_search_string"
+          placeholder="Search"
+        />
+        <!-- WHEN THERE ARE OPTIONS TO CLICK -->
+        <div class="optionslist" :key="query_search_string">
+          <div v-if="options.length">
+            <label
+              v-for="option in options
+                .filter(
+                  (str) =>
+                    str
+                      .toLowerCase()
+                      .indexOf(query_search_string.toLowerCase()) > -1
+                )
+                .sort((a, b) => {
+                  if (
+                    query_params[column_param] &&
+                    query_params[column_param].indexOf(a) >= 0
+                  ) {
+                    return -1;
+                  }
+                  return 1;
+                })"
+              :key="option"
+              class="optionrow"
+            >
+              <input
+                type="checkbox"
+                class="form-check-label"
+                id="flexCheckDefault"
+                :value="option"
+                :checked="
+                  query_params[column_param] &&
+                  query_params[column_param].length &&
+                  query_params[column_param].indexOf(option) >= 0
+                "
+                @change="editSelect(column_param, option)"
+              />{{ option }}
+            </label>
+          </div>
+          <div v-else>...Loading</div>
         </div>
-        <div v-else>...Loading</div>
       </div>
-      <div v-if="options.length" class="footer">
+      <div v-else-if="['trade_date', 'filing_date'].indexOf(column_param) >= 0">
+        HELLO
+        <date-picker
+          v-if="options.min"
+          :minDate="options.min"
+          :maxDate="options.max"
+        ></date-picker>
+      </div>
+      <div class="footer">
         <div class="footertext">
           If none are selected it's the same as if all were <br />
           Changes are saved automatically
@@ -88,6 +125,8 @@
         </div>
       </div>
     </div>
+
+    <!-- THIS IS THE POPUP FOR THE DATES -->
   </div>
 </template>
 
@@ -113,6 +152,7 @@ export default {
         comp_name: null,
         stock_price: null,
         stock_quantity: null,
+        stock_total: null,
 
         query: null,
       },
@@ -132,6 +172,7 @@ export default {
         comp_name: "Company name",
         stock_price: "Stock price",
         stock_quantity: "Stock quantity",
+        stock_total: "Total value purchased",
       };
       if (param_translator[par]) {
         return param_translator[par];
@@ -238,6 +279,13 @@ export default {
     width: 800px;
     height: 600px;
 
+    .popuptitle {
+      top: 0px;
+      margin-top: -10px;
+      margin-bottom: 10px;
+      font-size: 1.3em;
+    }
+
     .searchBar {
       background-color: white;
       width: 90%;
@@ -250,6 +298,8 @@ export default {
     }
 
     .footer {
+      position: absolute;
+      bottom: 5px;
       padding-top: 10px;
       padding-left: 15px;
       width: 100%;
