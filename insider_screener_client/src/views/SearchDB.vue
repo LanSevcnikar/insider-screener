@@ -12,6 +12,7 @@
             <th scope="col">Company industry</th>
             <th scope="col">Buyer's name</th>
             <th scope="col">Buyer's titles</th>
+            <th scope="col">Bought</th>
           </tr>
         </thead>
         <tbody>
@@ -69,15 +70,14 @@ export default {
     };
   },
   methods: {
-    async makeQuery() {
-      console.log("Making a query");
-      const query = `SELECT * FROM is_past_trades WHERE ${this.query} LIMIT ${this.amount};`;
+    async makeQuery(query_params) {
+      this.shown_data = [];
       const payload = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ query: query }),
+        body: JSON.stringify({ query_params: query_params, }),
       };
       const res = await fetch("http://localhost:3000/searchdb", payload);
       const res_json = await res.json();

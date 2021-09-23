@@ -1,7 +1,5 @@
 <template>
   <div class="higest">
-    {{ minDate }} <br />
-    {{ maxDate }} <br />
     <!-- YEAR -->
     <div class="dateselector">
       <span class="selectordate">Starting date:</span>
@@ -32,7 +30,7 @@
           {{ +month }}
         </option>
       </select>
-      <select class="select day">
+      <select class="select day" v-model="s_day">
         <option value="null" disabled></option>
         <option
           v-for="(day, index) in dateOptions[s_year][s_month]"
@@ -46,7 +44,7 @@
     </div>
     <div class="dateselector">
       <span class="selectordate">Ending date:</span>
-      <select class="select year" v-model="s_year">
+      <select class="select year" v-model="e_year">
         <option value="null" disabled></option>
         <option
           v-for="(year, index) in Object.keys(dateOptions)"
@@ -57,10 +55,10 @@
         </option>
       </select>
       <!-- MONTH -->
-      <select class="select month" v-model="s_month">
+      <select class="select month" v-model="e_month">
         <option value="null" disabled></option>
         <option
-          v-for="(month, index) in Object.keys(dateOptions[s_year]).sort(
+          v-for="(month, index) in Object.keys(dateOptions[e_year]).sort(
             (a, b) => {
               if (+a > +b) return 1;
               return -1;
@@ -68,25 +66,28 @@
           )"
           :key="index"
           :value="month"
-          v-if="s_year"
+          v-if="e_year"
         >
           {{ +month }}
         </option>
       </select>
-      <select class="select day">
+      <select class="select day" v-model="e_day">
         <option value="null" disabled></option>
         <option
-          v-for="(day, index) in dateOptions[s_year][s_month]"
+          v-for="(day, index) in dateOptions[e_year][e_month]"
           :key="index"
           :value="day"
-          v-if="s_month"
+          v-if="e_month"
         >
           {{ +day }}
         </option>
       </select>
     </div>
-    <div class="ok">
-      okm
+    <div class="ok" v-if="validDate()" style="color: green">
+      Valid date, changes saved
+    </div>
+    <div v-else class="ok" style="color: red">
+      Invalid date, no date selected yet
     </div>
   </div>
 </template>
@@ -94,9 +95,33 @@
 <script>
 import Timestamp from "unix-timestamp";
 import Dateformat from "dateformat";
+import { ref } from "vue";
 
 export default {
-  props: ["minDate", "maxDate"],
+  setup() {
+    const input = ref("");
+    return { input };
+  },
+  created() {
+    if (this.lastdate != null) {
+      this.s_year = this.lastdate.substring(0, 4);
+      this.s_month = this.lastdate.substring(5, 7);
+      this.s_day = this.lastdate.substring(8, 10);
+      this.e_year = this.lastdate.substring(11, 15);
+      this.e_month = this.lastdate.substring(16, 18);
+      this.e_day = this.lastdate.substring(19, 21);
+
+      console.log(
+        this.s_year,
+        this.s_month,
+        this.s_day,
+        this.e_year,
+        this.e_month,
+        this.e_day
+      );
+    }
+  },
+  props: ["minDate", "maxDate", "lastdate"],
   data() {
     return {
       s_months: [],
@@ -128,6 +153,41 @@ export default {
         "Dec.",
       ],
     };
+  },
+  methods: {
+    clearData() {
+      this.s_year = null;
+      this.s_month = null;
+      this.s_day = null;
+      this.e_year = null;
+      this.e_month = null;
+      this.e_day = null;
+    },
+
+    validDate() {
+      if (
+        !(
+          this.s_year &&
+          this.s_month &&
+          this.s_day &&
+          this.e_year &&
+          this.e_month &&
+          this.e_day
+        )
+      ) {
+        return false;
+      }
+
+      const s_date = this.s_year * 10000 + this.s_month * 100 + this.s_day;
+      const e_date = this.e_year * 10000 + this.e_month * 100 + this.e_day;
+
+      if (s_date > e_date) return false;
+
+      const datestring = `${this.s_year}-${this.s_month}-${this.s_day}/${this.e_year}-${this.e_month}-${this.e_day}`;
+      this.$emit("update:modelValue", datestring);
+
+      return true;
+    },
   },
   computed: {
     years() {
@@ -183,6 +243,11 @@ export default {
 
 <style lang="scss" scoped>
 .higest {
+  margin-top: 180px;
+
+  .ok {
+    margin-top: 30px;
+  }
   .dateselector {
     align-content: flex-start;
 

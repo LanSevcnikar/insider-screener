@@ -11,6 +11,7 @@
         <span v-if="index">, </span> {{ title }}
       </span>
     </td>
+    <td>{{ getMoneyFormat(trade.stock_price * trade.stock_quantity) }}</td>
   </tr>
 
   <tr v-if="show_details" style="border: 1px solid black">
@@ -46,6 +47,7 @@
 
 <script>
 const dateFormat = require("dateformat");
+const numeral = require('numeral');
 
 export default {
   props: ["trade", "index"],
@@ -63,8 +65,12 @@ export default {
     filing_date() {
       return dateFormat(this.trade.filing_date, "mmm dd, yyyy");
     },
+    
   },
   methods: {
+    getMoneyFormat(num) {
+       return numeral(num).format('$ 0.00a');
+    },
     async change_state() {
       if (!this.show_details) {
         try {

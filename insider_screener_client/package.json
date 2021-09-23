@@ -10,12 +10,15 @@
   "dependencies": {
     "@popperjs/core": "^2.10.1",
     "@vue/cli-plugin-eslint": "^4.5.13",
+    "@vueform/slider": "^2.0.5",
     "bootstrap": "^5.0.0-beta3",
     "core-js": "^3.6.5",
     "dateformat": "^4.5.1",
+    "numeral": "^2.0.6",
     "sass-loader": "^10.1.1",
     "unix-timestamp": "^0.2.0",
     "vue": "^3.0.0",
+    "vue-draggable-next": "^2.0.1",
     "vue-fusioncharts": "^3.2.0",
     "vue-router": "^4.0.0-0",
     "vuex": "^4.0.0-0"
