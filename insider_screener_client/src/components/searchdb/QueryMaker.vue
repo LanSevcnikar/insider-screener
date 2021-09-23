@@ -546,7 +546,7 @@ export default {
       top: 0px;
       margin-top: -10px;
       margin-bottom: 10px;
-      font-size: 1.3em;
+      font-size: 1.2em;
     }
 
     .searchBar {
@@ -557,7 +557,7 @@ export default {
       padding-left: 20px;
       margin-bottom: 16px;
       border: 1px solid #aaa;
-      font-size: 1.3em;
+      font-size: 1.2em;
     }
 
     .footer {

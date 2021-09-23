@@ -1,17 +1,17 @@
 <template>
-  <tr @click="change_state()">
-    <th scope="row">{{ index + 1 }}</th>
-    <td>{{ trade_date }}</td>
-    <td>{{ filing_date }}</td>
-    <td>{{ trade.comp_name }}</td>
-    <td>{{ trade.comp_industry }}</td>
-    <td>{{ trade.buyer_name }}</td>
+  <tr>
+    <th scope="row"><input type="checkbox" /></th>
+    <td @click="change_state()">{{ trade_date }}</td>
+    <td @click="change_state()">{{ filing_date }}</td>
+    <td @click="change_state()">{{ trade.comp_name }}</td>
+    <td @click="change_state()">{{ trade.comp_industry }}</td>
+    <td @click="change_state()">{{ trade.buyer_name }}</td>
     <td>
       <span v-for="(title, index) in trade.buyer_titles" :key="index">
         <span v-if="index">, </span> {{ title }}
       </span>
     </td>
-    <td>{{ getMoneyFormat(trade.stock_price * trade.stock_quantity) }}</td>
+    <td>{{ getMoneyFormat(trade.stock_total) }}</td>
   </tr>
 
   <tr v-if="show_details" style="border: 1px solid black">
@@ -47,7 +47,7 @@
 
 <script>
 const dateFormat = require("dateformat");
-const numeral = require('numeral');
+const numeral = require("numeral");
 
 export default {
   props: ["trade", "index"],
@@ -65,11 +65,10 @@ export default {
     filing_date() {
       return dateFormat(this.trade.filing_date, "mmm dd, yyyy");
     },
-    
   },
   methods: {
     getMoneyFormat(num) {
-       return numeral(num).format('$ 0.00a');
+      return numeral(num).format("$ 0.00a");
     },
     async change_state() {
       if (!this.show_details) {

@@ -127,7 +127,7 @@ app.post('/searchdb', async (req, res) => {
   try {
     const query_params = req.body.query_params;
     console.log('searchdb has been called', query_params)
-    const query_string_data = query_builder('SELECT * FROM is_past_trades WHERE', query_params, '');
+    const query_string_data = query_builder('SELECT *, stock_price * stock_quantity AS stock_total FROM is_past_trades WHERE', query_params, '');
     const query_res_data = await pool.query(query_string_data);
     res.send(query_res_data)
   } catch (e) {
