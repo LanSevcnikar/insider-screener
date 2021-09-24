@@ -4,6 +4,8 @@ const fs = require('fs')
 const { Pool } = require('pg')
 var cors = require('cors')
 
+// THis is a test to see if I can push this to GitHUB
+
 const app = express()
 app.use(bodyParser.json());
 app.use(cors())
